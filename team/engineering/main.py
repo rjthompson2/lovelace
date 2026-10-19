@@ -982,14 +982,14 @@ If you cannot complete the task, explain the blocker honestly.
 
             print(f"Tool: {name}({json.dumps(args)[:250]})")
 
+            if name == "finished":
+                return messages
+
             try:
                 function = FUNCTIONS.get(name)
 
                 if function is None:
                     raise ValueError("Unknown tool.")
-
-                if function == "finished":
-                    return messages
 
                 result = function(**args)
 
