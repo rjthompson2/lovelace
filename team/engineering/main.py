@@ -850,19 +850,6 @@ TOOLS = [
             },
         },
     },
-    {
-        "type": "function",
-        "function": {
-            "name": "finished",
-            "description": "All necessary work has been completed. Going further would be a waste of CPU.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                },
-                "required": [],
-            },
-        },
-    },
 ]
 
 FUNCTIONS = {
@@ -928,7 +915,6 @@ To help with this, get_diff shows the difference between the current branch and 
 6. Call verify_final_diff after the final edits and tests.
 7. Finish only if verification returns verified=true.
 8. If verification fails, continue working; do not claim success.
-9. Call finished when tasks are all complete.
 
 Tool calls execute real actions. Text that looks like a tool call is not
 a tool call. Never claim a file was created unless a tool confirms it.
@@ -981,9 +967,6 @@ If you cannot complete the task, explain the blocker honestly.
             args = call.function.arguments or {}
 
             print(f"Tool: {name}({json.dumps(args)[:250]})")
-
-            if name == "finished":
-                return messages
 
             try:
                 function = FUNCTIONS.get(name)
