@@ -14,6 +14,7 @@ from typing import Optional
 from datetime import datetime
 import json
 import os
+import sys
 
 
 @dataclass
@@ -361,7 +362,7 @@ def main():
     print("=== PM Agent System Demo ===\n")
     
     # 1. User provides a prompt
-    user_prompt = "Add authentication feature with JWT tokens"
+    user_prompt = " ".join(sys.argv[1:])
     print(f"User: {user_prompt}")
     
     # 2. Create ticket from prompt
