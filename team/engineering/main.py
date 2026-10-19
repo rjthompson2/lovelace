@@ -13,7 +13,7 @@ from utils import ROOT
 from ollama import chat
 
 MODEL = "qwen3.5:4b"
-MAX_STEPS = 15
+MAX_STEPS = 50
 MAX_FILE_CHARS = 30_000
 MAX_EDITS_PER_FILE = 3
 MAX_PLAN_STEPS = 8
@@ -990,6 +990,7 @@ If you cannot complete the task, explain the blocker honestly.
     print("\nStopped: maximum step count reached.")
     print("The agent did not establish successful completion.")
     print("Review the branch and Git diff manually.")
+    return str(messages)
 
 
 if __name__ == "__main__":
