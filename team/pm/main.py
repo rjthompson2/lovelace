@@ -66,7 +66,7 @@ class TicketManager:
                      if not k.startswith('_')} 
                  for tid, ticket in self.tickets.items()}
         with open(self.tickets_file, 'w') as f:
-            json.dump(data, f, indent=2, default=str)
+            json.dump(data, f, indent=2)
     
     def create_ticket(self, title: str, description: str, 
                      priority: str = "medium") -> Ticket:
