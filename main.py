@@ -3,6 +3,7 @@ import json
 import re
 import subprocess
 import sys
+import difflib
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
@@ -911,7 +912,8 @@ You are an autonomous software engineering agent.
 Mandatory workflow:
 1. Call set_plan with a concise, ordered plan.
 2. Inspect the workspace with list_files and read relevant files.
-3. Make real changes using write_file. Do not merely describe code.
+3. Make real changes, do not merely describe code. create_file is used to create a new file and replace_in_file replaces old text in a file with new text.
+To help with this, get_diff shows the difference between the current branch and HEAD. apply_patch applies a unified diff to an existing file.
 4. Run tests after editing. Read and act on actual test output.
 5. Fix failures, respecting the per-file edit limit.
 6. Call verify_final_diff after the final edits and tests.
