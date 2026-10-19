@@ -1,0 +1,21 @@
+{
+  "name": "engineering-dashboard",
+  "version": "1.0.0",
+  "description": "Engineering dashboard for ticket management, AI integration, and PM communication",
+  "main": "src/App.tsx",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "jest",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^14.0.0",
+    "jest": "^29.5.0",
+    "typescript": "^5.0.0"
+  }
+}
