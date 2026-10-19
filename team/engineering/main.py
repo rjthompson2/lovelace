@@ -7,6 +7,7 @@ import difflib
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
+from utils import ROOT
 
 from ollama import chat
 
@@ -15,8 +16,6 @@ MAX_STEPS = 15
 MAX_FILE_CHARS = 30_000
 MAX_EDITS_PER_FILE = 3
 MAX_PLAN_STEPS = 8
-
-ROOT = (Path(__file__).parent / "workspace").resolve()
 
 ALLOWED_EXTENSIONS = {
     ".py", ".md", ".txt", ".json",
