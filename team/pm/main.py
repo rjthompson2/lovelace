@@ -10,6 +10,7 @@ This system acts as a PM that:
 """
 
 from dataclasses import dataclass, field
+from team.engineering.main import main as agent_code
 from typing import Optional
 from datetime import datetime
 import json
@@ -106,12 +107,13 @@ class TicketManager:
 class PromptConverter:
     """Converts user prompts into structured tickets for engineering AI."""
     
-    def __init__(self):
+    def __init__(self, ticket_manager):
         self.templating_patterns = {
             "feature": "Implement the following feature:\n\n{description}\n\nPriority: {priority}",
             "bug_fix": "Fix the following bug:\n\n{description}\n\nExpected behavior: {expected_behavior}\n\nActual behavior: {actual_behavior}",
             "refactor": "Refactor the following code:\n\n{description}\n\nGoal: {goal}",
         }
+        self.ticket_manager = ticket_manager
     
     def convert_prompt_to_ticket(self, user_prompt: str) -> Ticket:
         """Convert a raw user prompt into a ticket."""
@@ -121,7 +123,7 @@ class PromptConverter:
         
         priority = self._extract_priority(user_prompt)
         
-        ticket = self.create_ticket(title, description, priority)
+        ticket = self.ticket_manager.create_ticket(title, description, priority)
         
         # Set engineering AI prompt
         ticket.prompt_for_engineering_ai = self._format_engineering_prompt(ticket)
@@ -202,27 +204,13 @@ class EngineeringAIInterface:
         """Deliver a ticket to engineering AI and return response."""
         prompt = ticket.prompt_for_engineering_ai
         
-        # Simulate engineering AI response (in real implementation, this would call actual AI)
-        response = self._simulate_engineering_response(prompt, ticket.id)
+        # Engineering AI response
+        response = agent_code(prompt)
         
         ticket.engineering_response = response
         ticket.updated_at = datetime.now()
         
         return response
-    
-    def _simulate_engineering_response(self, prompt: str, ticket_id: str) -> str:
-        """Simulate engineering AI's response to a ticket."""
-        # In production, this would call an actual LLM API
-        return f"""Engineering AI Response for Ticket {ticket_id}:
-
-I've analyzed the request and will implement the solution.
-
-Key implementation points:
-- Code structure changes
-- Test coverage additions
-- Documentation updates
-
-Please review my implementation against the ticket requirements."""
     
     def get_response(self, ticket_id: str) -> Optional[str]:
         """Retrieve engineering AI's response for a ticket."""
@@ -303,7 +291,7 @@ class PMAgent:
     
     def __init__(self):
         self.ticket_manager = TicketManager()
-        self.prompt_converter = PromptConverter()
+        self.prompt_converter = PromptConverter(self.ticket_manager)
         self.engineering_ai = EngineeringAIInterface()
         self.review_agent = ReviewAgent()
     

@@ -890,7 +890,7 @@ def prepare_git_branch():
     print(f"Working on branch: {branch}")
 
 
-def main():
+def main(task):
     if len(sys.argv) < 2:
         print('Usage: python main.py "Describe the task"')
         sys.exit(1)
@@ -899,8 +899,6 @@ def main():
         raise RuntimeError(f"Workspace not found: {ROOT}")
 
     prepare_git_branch()
-
-    task = " ".join(sys.argv[1:])
 
     messages = [
         {
@@ -996,4 +994,4 @@ If you cannot complete the task, explain the blocker honestly.
 
 
 if __name__ == "__main__":
-    main()
+    main(task = " ".join(sys.argv[1:]))
