@@ -952,6 +952,7 @@ If you cannot complete the task, explain the blocker honestly.
                 return
 
             print("Model responded without calling a tool.")
+            print(message.content)
             messages.append({
                 "role": "user",
                 "content": (
