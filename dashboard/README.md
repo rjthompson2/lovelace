@@ -46,6 +46,54 @@ npm test -- dashboard/
 
 Test files are located in `dashboard/__tests__/`.
 
+## Running the Dashboard
+
+### Prerequisites
+
+- Node.js (v18 or later)
+- npm (v8 or later)
+
+### Installation
+
+1. Navigate to the dashboard folder:
+   ```bash
+   cd dashboard
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. If using a package manager like yarn:
+   ```bash
+   yarn install
+   ```
+
+### Running the Dashboard
+
+To start the development server:
+
+```bash
+npm start
+```
+
+Or with yarn:
+```bash
+yarn start
+```
+
+The dashboard will be available at `http://localhost:3000` by default.
+
+### Development Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm start` or `yarn start` | Start the development server |
+| `npm run build` | Build for production |
+| `npm test` | Run all tests |
+| `npm run lint` | Run ESLint |
+
 ## License
 
 MIT License
