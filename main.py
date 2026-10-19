@@ -10,7 +10,7 @@ from pathlib import Path
 
 from ollama import chat
 
-MODEL = "qwen3:4b"
+MODEL = "qwen2.5-coder:7b"
 MAX_STEPS = 15
 MAX_FILE_CHARS = 30_000
 MAX_EDITS_PER_FILE = 3
