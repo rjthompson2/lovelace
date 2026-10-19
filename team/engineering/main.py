@@ -1,6 +1,7 @@
 
 import json
 import re
+import os
 import subprocess
 import sys
 import difflib
@@ -170,9 +171,7 @@ def create_file(path: str, content: str) -> str:
         )
 
     if not target.parent.is_dir():
-        raise FileNotFoundError(
-            f"Parent directory does not exist: {target.parent}"
-        )
+        os.makedirs(target.parent, exist_ok=True)
 
     # Exclusive creation ('x') prevents overwriting, including a race
     # where another process creates the file after the existence check.
