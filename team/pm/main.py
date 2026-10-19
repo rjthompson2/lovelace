@@ -48,25 +48,61 @@ class TicketManager:
     """Manages ticket storage, observation, and lifecycle."""
     
     def __init__(self, tickets_file: str = "tickets.json"):
-        self.tickets_file = tickets_file
+        self.tickets_file = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            tickets_file
+        )
         self.tickets: dict[str, Ticket] = {}
         self._load_tickets()
     
+   
     def _load_tickets(self):
         """Load tickets from storage."""
-        if os.path.exists(self.tickets_file):
-            with open(self.tickets_file, 'r') as f:
+        if not os.path.exists(self.tickets_file):
+            self.tickets = {}
+            return
+
+        try:
+            with open(self.tickets_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                for ticket_id, ticket_data in data.items():
-                    self.tickets[ticket_id] = Ticket(**ticket_data)
-    
+
+            for ticket_id, ticket_data in data.items():
+                ticket_data = dict(ticket_data)
+
+                # Restore datetime objects from ISO-formatted strings.
+                for field_name in ("created_at", "updated_at"):
+                    value = ticket_data.get(field_name)
+                    if isinstance(value, str):
+                        ticket_data[field_name] = datetime.fromisoformat(value)
+
+                self.tickets[ticket_id] = Ticket(**ticket_data)
+
+        except json.JSONDecodeError as e:
+            raise ValueError(
+                f"Invalid JSON in {self.tickets_file}, "
+                f"line {e.lineno}, column {e.colno}: {e.msg}"
+            ) from e
+
+
     def _save_tickets(self):
         """Save tickets to storage."""
-        data = {tid: {k: v for k, v in vars(ticket).items() 
-                     if not k.startswith('_')} 
-                 for tid, ticket in self.tickets.items()}
-        with open(self.tickets_file, 'w') as f:
-            json.dump(data, f, indent=2)
+        data = {}
+
+        for ticket_id, ticket in self.tickets.items():
+            ticket_data = vars(ticket).copy()
+
+            # Convert datetime objects into JSON-compatible strings.
+            for field_name in ("created_at", "updated_at"):
+                value = ticket_data.get(field_name)
+                if isinstance(value, datetime):
+                    ticket_data[field_name] = value.isoformat()
+
+            data[ticket_id] = ticket_data
+
+        with open(self.tickets_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+            f.write("\n")
+
     
     def create_ticket(self, title: str, description: str, 
                      priority: str = "medium") -> Ticket:
@@ -127,6 +163,7 @@ class PromptConverter:
         
         # Set engineering AI prompt
         ticket.prompt_for_engineering_ai = self._format_engineering_prompt(ticket)
+        self.ticket_manager._save_tickets()
         
         return ticket
     
@@ -240,7 +277,7 @@ class ReviewAgent:
         issues = []
         
         # Check if response addresses the ticket description
-        if not response.lower().contains(ticket.description.lower()):
+        if not ticket.description.lower() in response.lower():
             issues.append("Response does not address key requirements")
         
         # Check priority alignment
