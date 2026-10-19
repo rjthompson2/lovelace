@@ -9,7 +9,7 @@ from pathlib import Path
 
 from ollama import chat
 
-MODEL = "qwen2.5-coder:7b"
+MODEL = "qwen3:4b"
 MAX_STEPS = 15
 MAX_FILE_CHARS = 30_000
 MAX_EDITS_PER_FILE = 3
@@ -593,7 +593,7 @@ If you cannot complete the task, explain the blocker honestly.
 
             messages.append({
                 "role": "tool",
-                "name": name,
+                "tool_name": name,
                 "content": str(result),
             })
 
