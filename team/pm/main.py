@@ -10,7 +10,7 @@ This system acts as a PM that:
 """
 
 from dataclasses import dataclass, field
-from lovelace.team.engineering.main import main as agent_code
+from team.engineering.main import main as agent_code
 from typing import Optional
 from datetime import datetime
 import json
