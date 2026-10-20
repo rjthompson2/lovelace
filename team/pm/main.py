@@ -332,10 +332,133 @@ class PMAgent:
         self.engineering_ai = EngineeringAIInterface()
         self.review_agent = ReviewAgent()
     
+    def confirm_cancel_prompt(self, ticket: Ticket) -> bool:
+        """Ask user if they want to proceed with creating a ticket.
+        
+        Returns True if user wants to proceed (y), False otherwise (n).
+        Allows for back-and-forth communication before finalizing the ticket.
+        """
+        print(f"\n{'='*60}")
+        print(f"Ticket Preview: {ticket.id} - {ticket.title}")
+        print(f"Priority: {ticket.priority}")
+        print(f"Status: {ticket.status}")
+        print(f"{'='*60}")
+        
+        # Allow user to communicate and provide feedback
+        print("\nPM Agent:")
+        print("I've created a ticket based on your initial prompt. Before we proceed,")
+        print("please review the following details:")
+        print()
+        print("1. Does this title accurately reflect what you want to build/fix?")
+        print("2. Is the priority level appropriate?")
+        print("3. Would you like me to suggest any improvements or alternatives?")
+        print()
+        
+        # Get user feedback
+        feedback = self.get_user_feedback(ticket)
+        print(f"\nYour feedback: {feedback}")
+        
+        # Ask for confirmation
+        print("\nWould you like to proceed with creating this ticket? (y/n)")
+        
+        try:
+            response = input().strip().lower()
+            return response in ('y', 'yes')
+        except (EOFError, KeyboardInterrupt):
+            print("\nUser cancelled the operation.")
+            return False
+    
+    def get_user_feedback(self, ticket: Ticket) -> str:
+        """Collect user feedback on the ticket before finalizing.
+        
+        Allows users to provide clarifications, suggestions, or alternatives.
+        Returns a summary of user feedback.
+        """
+        print("\nPM Agent:")
+        print("Please provide your feedback on this ticket:")
+        print()
+        print("Options:")
+        print("  - Suggest title changes")
+        print("  - Adjust priority level")
+        print("  - Provide additional requirements")
+        print("  - Request alternative approaches")
+        print()
+        
+        # Collect user's feedback
+        feedback = "No changes requested."
+        
+        # Allow user to provide clarifications or suggestions
+        print("What would you like to change or add? (or press Enter to skip):")
+        try:
+            additional_feedback = input().strip()
+            if additional_feedback:
+                feedback = f"User suggested: {additional_feedback}"
+        except (EOFError, KeyboardInterrupt):
+            pass
+        
+        return feedback
+    
     def create_ticket_from_prompt(self, user_input: str) -> Ticket:
-        """Create a ticket from a raw user prompt."""
-        ticket = self.prompt_converter.convert_prompt_to_ticket(user_input)
-        return ticket
+        """Create a ticket from a raw user prompt with user confirmation.
+        
+        Flow:
+        1. Create draft ticket from prompt
+        2. Show draft to user for review
+        3. Allow user to provide feedback/suggestions/alternatives
+        4. Ask user if they want to proceed (y/n)
+        5. If yes, create final ticket and return it
+        """
+        # Create draft ticket from prompt
+        draft_ticket = self.prompt_converter.convert_prompt_to_ticket(user_input)
+        
+        # Show draft to user for review
+        print(f"\n{'='*60}")
+        print("Draft Ticket Preview:")
+        print(f"{'='*60}")
+        print(f"ID: {draft_ticket.id}")
+        print(f"Title: {draft_ticket.title}")
+        print(f"Description: {draft_ticket.description}")
+        print(f"Priority: {draft_ticket.priority}")
+        print(f"Status: {draft_ticket.status}")
+        print(f"{'='*60}")
+        
+        # Allow user to provide feedback and suggest alternatives
+        print("\nPM Agent:")
+        print("I've created a draft ticket based on your initial prompt. Please review")
+        print("and provide any clarifications, suggestions, or alternative approaches:")
+        print()
+        print("Suggestions you can make:")
+        print("  - Change the title to better reflect the work")
+        print("  - Adjust the priority level (low/medium/high/critical)")
+        print("  - Add more details to the description")
+        print("  - Suggest alternative approaches or solutions")
+        print()
+        
+        # Get user feedback
+        feedback = self.get_user_feedback(draft_ticket)
+        print(f"\nYour feedback: {feedback}")
+        
+        # Ask for confirmation
+        print("\nWould you like to proceed with creating this ticket? (y/n)")
+        
+        try:
+            response = input().strip().lower()
+            if response in ('y', 'yes'):
+                # Create final ticket with user's feedback incorporated
+                final_ticket = Ticket(
+                    id=f"TICKET-{len(self.ticket_manager.tickets) + 1:04d}",
+                    title=draft_ticket.title,
+                    description=draft_ticket.description,
+                    priority=draft_ticket.priority
+                )
+                self.ticket_manager.tickets[final_ticket.id] = final_ticket
+                return final_ticket
+            else:
+                print("\nUser chose to cancel. Ticket creation aborted.")
+                return None
+        except (EOFError, KeyboardInterrupt):
+            print("\nUser cancelled the operation.")
+            return None
     
     def deliver_to_engineering_ai(self, ticket: Ticket) -> str:
         """Deliver a ticket to engineering AI and get response."""
@@ -390,28 +513,40 @@ def main():
     user_prompt = " ".join(sys.argv[1:])
     print(f"User: {user_prompt}")
     
-    # 2. Create ticket from prompt
+    # 2. Create ticket from prompt with user confirmation
     ticket = pm.create_ticket_from_prompt(user_prompt)
+    
+    # Ask user for confirmation before proceeding
+    if not pm.confirm_cancel_prompt(ticket):
+        print("\nUser cancelled the ticket creation process.")
+        return
+    
     print(f"\nTicket created: {ticket.id} - {ticket.title}")
     print(f"Status: {ticket.status}, Priority: {ticket.priority}")
     
-    # 3. Deliver to engineering AI
-    print("\nDelivering to Engineering AI...")
-    response = pm.deliver_to_engineering_ai(ticket)
-    print(f"\nEngineering AI Response:\n{response[:200]}...")
+    # 3. Deliver to engineering AI (only if ticket was created)
+    if ticket:
+        print("\nDelivering to Engineering AI...")
+        response = pm.deliver_to_engineering_ai(ticket)
+        print(f"\nEngineering AI Response:\n{response[:200]}...")
+    else:
+        print("\nSkipping engineering AI delivery - user cancelled.")
     
-    # 4. Review the work
-    print("\nReviewing engineering AI's work...")
-    review_result = pm.review_work(ticket.id)
-    print(f"Review Result: {review_result}")
-    
-    if "REVIEW REQUIRED" in review_result:
-        print("\nRewriting prompt for iteration 2...")
-        new_prompt = pm.rewrite_prompt(ticket.id)
-        print(f"New Prompt:\n{new_prompt[:150]}...")
+    # 4. Review the work (only if ticket was created)
+    if ticket:
+        print("\nReviewing engineering AI's work...")
+        review_result = pm.review_work(ticket.id)
+        print(f"Review Result: {review_result}")
         
-        # Update ticket with new prompt
-        pm.update_ticket(ticket.id, {"prompt_for_engineering_ai": new_prompt})
+        if "REVIEW REQUIRED" in review_result:
+            print("\nRewriting prompt for iteration 2...")
+            new_prompt = pm.rewrite_prompt(ticket.id)
+            print(f"New Prompt:\n{new_prompt[:150]}...")
+            
+            # Update ticket with new prompt
+            pm.update_ticket(ticket.id, {"prompt_for_engineering_ai": new_prompt})
+    else:
+        print("\nSkipping review - user cancelled earlier.")
     
     # 5. Get all tickets
     print("\n=== All Tickets ===")
