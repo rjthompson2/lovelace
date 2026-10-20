@@ -938,7 +938,7 @@ If you cannot complete the task, explain the blocker honestly.
             )
         except Exception as exc:
             print(f"Model request failed: {type(exc).__name__}: {exc}")
-            return
+            return f"Model request failed.\nMessages: {str(messages)}\nException: {type(exc).__name__}: {exc}"
 
         message = response.message
         messages.append(message)
@@ -947,7 +947,7 @@ If you cannot complete the task, explain the blocker honestly.
         if not calls:
             if verified:
                 print(message.content or "Task completed and verified.")
-                return
+                return f"Task completed.\nMessages: {str(messages)}"
 
             print("Model responded without calling a tool.")
             print(message.content)
@@ -990,7 +990,7 @@ If you cannot complete the task, explain the blocker honestly.
     print("\nStopped: maximum step count reached.")
     print("The agent did not establish successful completion.")
     print("Review the branch and Git diff manually.")
-    return str(messages)
+    return f"Maximum steps reached.\nMessages: {str(messages)}"
 
 
 if __name__ == "__main__":
