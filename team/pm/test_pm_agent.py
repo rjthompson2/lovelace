@@ -6,7 +6,7 @@ engineering AI interface, and review capabilities.
 
 import pytest
 from datetime import datetime
-from team.pm.main import (
+from lovelace.team.pm.main import (
     Ticket,
     TicketManager,
     PromptConverter,
