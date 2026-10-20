@@ -501,7 +501,7 @@ class PMAgent:
         return list(self.ticket_manager.tickets.values())
 
 
-def main():
+def main(user_prompt = " ".join(sys.argv[1:])):
     """Main entry point demonstrating PM agent workflow."""
     
     pm = PMAgent()
@@ -510,7 +510,6 @@ def main():
     print("=== PM Agent System Demo ===\n")
     
     # 1. User provides a prompt
-    user_prompt = " ".join(sys.argv[1:])
     print(f"User: {user_prompt}")
     
     # 2. Create ticket from prompt with user confirmation
