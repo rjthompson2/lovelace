@@ -1,2 +1,4 @@
 tickets.json
 workspace/*
+node_modules
+.pytest_cache
