@@ -995,4 +995,5 @@ If you cannot complete the task, explain the blocker honestly.
 
 if __name__ == "__main__":
     task = " ".join(sys.argv[1:])
+    print(task)
     main(task=task)
